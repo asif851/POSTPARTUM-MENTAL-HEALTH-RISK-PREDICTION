@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postpartum Mental Health Risk Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .data-quality-banner {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            color: #856404;
+        }
+        
+        .data-quality-banner h3 {
+            margin-bottom: 10px;
+        }
+        
+        .data-quality-banner p {
+            margin: 5px 0;
+        }
+        
+        .label-info {
+            background: #e8f4fd;
+            border-left: 4px solid #17a2b8;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .label-info h4 {
+            color: #17a2b8;
+            margin-bottom: 10px;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .exact-label {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.1rem;
+            border: 1px solid #ddd;
+        }
+        
+        .exact-label strong {
+            color: #667eea;
+        }
+        
+        .risk-badge {
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .probability {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .recommendation {
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .score-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .score-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        .footer-note {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Postpartum Mental Health</h1>
+            <h1>Risk Prediction System</h1>
+            <p>Evidence-based screening for postpartum anxiety and suicide risk</p>
+        </div>
+        
+        <div class="data-quality-banner">
+            <h3>Data Quality Note</h3>
+            <p>This system was trained on the original dataset labels. Analysis revealed a potential coding reversal where patients labeled "Anxiety (YES)" showed fewer symptoms than "NO ANXIETY" patients.</p>
+            <p>Results are presented as-is for academic transparency. Clinical decisions should be made by qualified healthcare professionals.</p>
+        </div>
+        
+        <div class="label-info">
+            <h4>Exact Target Labels from Original Data</h4>
+            <p><strong>Anxiety Target:</strong> 0 = NO ANXIETY | 1 = ANXIETY (YES)</p>
+            <p><strong>Suicide Target:</strong> 0 = NO | 1 = YES | 2 = NOT INTERESTED TO SAY</p>
+        </div>
+        
+        <div class="main-grid">
+            <div class="card">
+                <h2>Patient Information</h2>
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label>Age (years)</label>
+                        <input type="number" id="age" name="age" value="30" min="18" max="50">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Feeling Sad</label>
+                            <select id="sad">
+                                <option value="no">No</option>
+                                <option value="sometimes">Sometimes</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Irritable</label>
+                            <select id="irritable">
+                                <option value="no">No</option>
+                                <option value="sometimes">Sometimes</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Sleep Issues</label>
+                            <select id="sleep">
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                                <option value="two or more days a week">Two or more days a week</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Concentration Problems</label>
+                            <select id="concentration">
+                                <option value="no">No</option>
+                                <option value="often">Often</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Appetite Changes</label>
+                            <select id="appetite">
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                                <option value="not at all">Not at all</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Guilt Feelings</label>
+                            <select id="guilt">
+                                <option value="no">No</option>
+                                <option value="maybe">Maybe</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Bonding Problems</label>
+                            <select id="bonding">
+                                <option value="no">No</option>
+                                <option value="sometimes">Sometimes</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Appointment Hour</label>
+                            <input type="number" id="hour" value="14" min="0" max="23">
+                        </div>
+                    </div>
+                    
+                    <button type="submit">Predict Risk</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2>Results</h2>
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing patient data...</p>
+                </div>
+                <div id="results" class="results">
+                    <div class="result-card">
+                        <h3>Anxiety Assessment</h3>
+                        <div class="exact-label">
+                            <strong>Prediction:</strong> 
+                            <span id="anxietyExactLabel"></span>
+                        </div>
+                        <div id="anxietyRisk" class="risk-badge"></div>
+                        <div id="anxietyProb" class="probability"></div>
+                        <div class="score-bar">
+                            <div id="anxietyScoreFill" class="score-fill" style="width: 0%;"></div>
+                        </div>
+                        <div id="anxietyRec" class="recommendation"></div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Suicide Assessment</h3>
+                        <div class="exact-label">
+                            <strong>Prediction:</strong> 
+                            <span id="suicideExactLabel"></span>
+                        </div>
+                        <div id="suicideRisk" class="risk-badge"></div>
+                        <div id="suicideRec" class="recommendation"></div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Overall Clinical Recommendation</h3>
+                        <div id="overallRisk" class="risk-badge"></div>
+                        <div id="overallAction" class="recommendation"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-note">
+            <p>This is a clinical decision support tool. All predictions should be reviewed by a qualified healthcare professional.</p>
+            <p><strong>Target Labels:</strong> Anxiety: NO ANXIETY (0) / ANXIETY (YES) (1) | Suicide: NO (0) / YES (1) / NOT INTERESTED TO SAY (2)</p>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('predictionForm');
+        const loading = document.getElementById('loading');
+        const resultsDiv = document.getElementById('results');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            loading.classList.add('show');
+            resultsDiv.classList.remove('show');
+            
+            const data = {
+                age: parseInt(document.getElementById('age').value),
+                sad: document.getElementById('sad').value,
+                irritable: document.getElementById('irritable').value,
+                sleep: document.getElementById('sleep').value,
+                concentration: document.getElementById('concentration').value,
+                appetite: document.getElementById('appetite').value,
+                guilt: document.getElementById('guilt').value,
+                bonding: document.getElementById('bonding').value,
+                hour: parseInt(document.getElementById('hour').value)
+            };
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Anxiety results - EXACT LABEL
+                    document.getElementById('anxietyExactLabel').textContent = result.anxiety.exact_label;
+                    
+                    const anxietyDiv = document.getElementById('anxietyRisk');
+                    anxietyDiv.textContent = result.anxiety.risk_level;
+                    anxietyDiv.style.backgroundColor = result.anxiety.color + '20';
+                    anxietyDiv.style.color = result.anxiety.color;
+                    anxietyDiv.style.borderLeft = `4px solid ${result.anxiety.color}`;
+                    
+                    document.getElementById('anxietyProb').textContent = result.anxiety.probability_percent;
+                    document.getElementById('anxietyRec').innerHTML = `<strong>Recommendation:</strong> ${result.anxiety.recommendation}`;
+                    
+                    const anxietyFill = document.getElementById('anxietyScoreFill');
+                    anxietyFill.style.width = `${result.anxiety.probability * 100}%`;
+                    anxietyFill.style.backgroundColor = result.anxiety.color;
+                    
+                    // Suicide results - EXACT LABEL
+                    document.getElementById('suicideExactLabel').textContent = result.suicide.exact_label;
+                    
+                    const suicideDiv = document.getElementById('suicideRisk');
+                    suicideDiv.textContent = `Risk: ${result.suicide.risk_level}`;
+                    suicideDiv.style.backgroundColor = result.suicide.color + '20';
+                    suicideDiv.style.color = result.suicide.color;
+                    suicideDiv.style.borderLeft = `4px solid ${result.suicide.color}`;
+                    document.getElementById('suicideRec').innerHTML = `<strong>Recommendation:</strong> ${result.suicide.recommendation}`;
+                    
+                    // Overall results
+                    const overallDiv = document.getElementById('overallRisk');
+                    overallDiv.textContent = `Overall Risk Level: ${result.overall_risk.level}`;
+                    overallDiv.style.backgroundColor = result.overall_risk.color + '20';
+                    overallDiv.style.color = result.overall_risk.color;
+                    overallDiv.style.borderLeft = `4px solid ${result.overall_risk.color}`;
+                    document.getElementById('overallAction').innerHTML = `<strong>Action Required:</strong> ${result.overall_risk.action}`;
+                    
+                    resultsDiv.classList.add('show');
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error connecting to server: ' + error.message);
+            } finally {
+                loading.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
